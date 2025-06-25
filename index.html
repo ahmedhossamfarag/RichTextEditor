@@ -1,0 +1,118 @@
+<html>
+
+<head>
+    <title>Rich Text Editor</title>
+    <link rel="stylesheet" href="./out/styles.css">
+</head>
+
+<body>
+    <div id="root" class="p-10">
+        <div
+            x-data="{decoration: 'none', italic: false, bold: false, list: 'none', sizesVisible: false, colorsVisible: false, sizes: [8, 10, 12, 14, 16, 18, 20, 24, 28], fontSize: 16, colors: ['red', 'green', 'blue', 'yellow', 'black', 'violet', 'orange', 'skyblue'], textColor: 'black', align: 'left', fontVisible: false, fonts: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Garamond', 'Helvetica', 'Impact', 'Lucida Console', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana'], fontFamily: 'Arial', }">
+            <div class="flex flex-row gap-1 bg-gray-500">
+                <button x-bind:class="decoration == 'underline' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer underline flex justify-center items-center"
+                    x-on:click="decoration = decoration == 'underline' ? 'none' : 'underline'">
+                    U
+                </button>
+                <button x-bind:class="decoration == 'line-through' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer line-through flex justify-center items-center"
+                    x-on:click="decoration = decoration == 'line-through' ? 'none' : 'line-through'">
+                    abc
+                </button>
+                <button x-bind:class="italic ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer italic flex justify-center items-center"
+                    x-on:click="italic = !italic">
+                    I
+                </button>
+                <button x-bind:class="bold ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer font-bold flex justify-center items-center" x-on:click="bold = !bold">
+                    B
+                </button>
+                <button x-bind:class="list == 'ul' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center"
+                    x-on:click="list = list === 'ul' ? 'none' : 'ul'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                </button>
+                <button x-bind:class="list == 'ol' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center"
+                    x-on:click="list = list === 'ol' ? 'none' : 'ol'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8.242 5.992h12m-12 6.003H20.24m-12 5.999h12M4.117 7.495v-3.75H2.99m1.125 3.75H2.99m1.125 0H5.24m-1.92 2.577a1.125 1.125 0 1 1 1.591 1.59l-1.83 1.83h2.16M2.99 15.745h1.125a1.125 1.125 0 0 1 0 2.25H3.74m0-.002h.375a1.125 1.125 0 0 1 0 2.25H2.99" />
+                    </svg>
+                </button>
+                <div class="flex justify-center items-center relative">
+                    <button class="w-8 h-8 cursor-pointer flex justify-center items-center hover:bg-blue-200"
+                        x-on:click="sizesVisible = !sizesVisible">A</button>
+                    <div class="absolute top-8 left-0 w-20 bg-gray-400" x-show="sizesVisible">
+                        <template x-for="size in sizes">
+                            <button x-text="size" class="cursor-pointer w-full h-8 hover:bg-blue-200"
+                                x-on:click="fontSize = size; sizesVisible = false"></button>
+                        </template>
+                    </div>
+                </div>
+                <div class="flex justify-center items-center relative">
+                    <button class="w-8 h-8 cursor-pointer flex justify-center items-center"
+                        x-on:click="colorsVisible = !colorsVisible">
+                        <span x-bind:style="{backgroundColor: textColor}" class="w-4 h-4"></span>
+                    </button>
+                    <div class="absolute top-8 left-0 w-20 bg-gray-400" x-show="colorsVisible">
+                        <template x-for="color in colors">
+                            <button x-bind:style="{backgroundColor: color}" class="cursor-pointer w-full h-8"
+                                x-on:click="textColor = color; colorsVisible = false"></button>
+                        </template>
+                    </div>
+                </div>
+                <button x-bind:class="align == 'left' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="align = 'left'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+                    </svg>
+                </button>
+                <button x-bind:class="align == 'center' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="align = 'center'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+                    </svg>
+                </button>
+                <button x-bind:class="align == 'right' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="align = 'right'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" />
+                    </svg>
+                </button>
+                <div class="flex justify-center items-center relative">
+                    <button x-bind:style="{fontFamily: fontFamily}"
+                        class="w-8 h-8 cursor-pointer flex justify-center items-center hover:bg-blue-200"
+                        x-on:click="fontVisible = !fontVisible">
+                        AA
+                    </button>
+                    <div class="absolute top-8 left-0 w-20 bg-gray-400" x-show="fontVisible">
+                        <template x-for="font in fonts">
+                            <button x-bind:style="{fontFamily: font}" x-text="font"
+                                class="cursor-pointer w-full min-h-8 hover:bg-blue-200"
+                                x-on:click="fontFamily = font; fontVisible = false"></button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-100 h-40" contenteditable>
+
+            </div>
+        </div>
+        <script type="module" src="out/main.js"></script>
+</body>
+
+</html>
