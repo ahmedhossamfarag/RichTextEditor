@@ -15,7 +15,7 @@ const currentStyle: { [key: string]: any } = {
     'text-decoration': 'none',
     'font-weight': "normal",
     'font-style': "normal",
-    'list': 'none',
+    'list-style-type': 'none',
     'font-size': "16px",
     'color': 'black',
     'text-align': 'left',
@@ -51,15 +51,6 @@ function splitNode(node: HTMLElement, start: number, end: number) {
     }
 }
 
-function cloneElement(element: HTMLElement, newTag: string) {
-    let clone = document.createElement(newTag)
-    for (let child of element.childNodes) {
-        clone.appendChild(child)
-    }
-    clone.style.setProperty("text-align", element.style.getPropertyValue("text-align"))
-    return clone
-}
-
 export function setStyle(style: string, value: string) {
     currentStyle[style] = value
 
@@ -68,6 +59,8 @@ export function setStyle(style: string, value: string) {
     let range = selection.getRangeAt(0)
     let start = range.startContainer.parentElement as HTMLElement
     let end = range.endContainer.parentElement as HTMLElement
+    if (start.tagName != 'SPAN' || end.tagName != 'SPAN') return
+
     if (start == end) {
         splitNode(start, range.startOffset, range.endOffset).style.setProperty(style, value)
         return
@@ -80,21 +73,7 @@ export function setStyle(style: string, value: string) {
         if (start.nextSibling) {
             start = start.nextSibling as HTMLElement
         }else{
-            let parent = start.parentElement as HTMLElement
-            let next = parent.nextSibling as HTMLElement
-            if(next == null){
-                if (parent.tagName == 'LI') {
-                    parent = parent.parentElement as HTMLElement
-                    next = parent.parentElement?.nextSibling as HTMLElement
-                }
-            }
-            if(next != null && (next.tagName == 'LI' || next.tagName == 'P')) {
-                start = next.firstChild as HTMLElement
-            }else if(next != null && next.tagName == 'UL' || next.tagName == 'OL') {
-                start = next.firstChild?.firstChild as HTMLElement
-            }else{
-                break
-            }
+            start = start.parentElement?.nextSibling?.firstChild as HTMLElement
         }
     }
     end.style.setProperty(style, value)
@@ -113,45 +92,20 @@ export function setLineStyle(style: string, value: string) {
         node = node.parentElement as HTMLElement
     }
 
-    if (node.tagName == 'LI' || node.tagName == 'P') {
-        if (style != 'list') {
-            node.style.setProperty(style, value)
-        } else {
-            if (value == 'none') {
-                if (node.tagName == 'LI') {
-                    let list = node.parentElement as HTMLElement
-                    let newList = document.createElement(list.tagName)
-                    let sibling: HTMLElement | null = node
-                    while (sibling = node.nextSibling as HTMLElement) {
-                        newList.appendChild(sibling)
-                    }
-                    let newNode = cloneElement(node, "p")
-                    list.parentElement?.insertBefore(newNode, list.nextSibling)
-                    if (newList.childNodes.length > 0) {
-                        list.parentElement?.insertBefore(newList, newNode.nextSibling)
-                    }
-                    node.remove()
-                    if(list.childNodes.length == 0) {
-                        list.remove()
-                    }
-                }
-            } else if (node.tagName == 'LI') {
-                let previousNode = node.previousElementSibling as HTMLElement
-                if (previousNode == null || previousNode.tagName != value) {
-                    previousNode = document.createElement(value)
-                    node.parentElement?.insertBefore(previousNode, node)
-                }
-                previousNode.appendChild(cloneElement(node, "li"))
-                node.remove()
-            }
+    if (node.tagName == 'P') {
+        node.style.setProperty(style, value)
+        if(style == 'list-style-type'){
+            node.setAttribute('data-list', value)
         }
     }
 }
 (window as any).setLineStyle = setLineStyle
 
 function createParagraph(editor: HTMLElement, text: string = "") {
-    let p = document.createElement(currentStyle.list == 'none' ? "p" : "li")
-    p.style.setProperty("text-align", currentStyle.align)
+    let p = document.createElement("p")
+    p.style.setProperty("text-align", currentStyle['text-align'])
+    p.style.setProperty("list-style-type", currentStyle['list-style-type'])
+    p.setAttribute("data-list", currentStyle['list-style-type'])
     let span = document.createElement("span")
     span.style.setProperty("color", currentStyle['color'])
     span.style.setProperty("font-family", currentStyle['font-family'])
@@ -161,16 +115,7 @@ function createParagraph(editor: HTMLElement, text: string = "") {
     span.style.setProperty("text-decoration", currentStyle['text-decoration'])
     span.textContent = text
     p.appendChild(span)
-    if (currentStyle.list == 'none') {
-        editor.appendChild(p)
-    } else {
-        let lastElement = editor.lastElementChild
-        if (lastElement == null || lastElement.tagName != currentStyle.list) {
-            lastElement = document.createElement(currentStyle['list'])
-            editor.appendChild(lastElement!!)
-        }
-        lastElement?.appendChild(p)
-    }
+    editor.appendChild(p)
     return p
 }
 
