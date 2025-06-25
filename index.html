@@ -28,7 +28,7 @@
                 },
                 toggleList(list) {
                     this.list = this.list === list ? 'none' : list
-                    setLineStyle('list-style-type', this.list)
+                    setLineStyle('list', this.list)
                 },
                 toggleAlign(align) {
                     this.align = this.align === align ? 'left' : align
@@ -67,8 +67,7 @@
                     abc
                 </button>
                 <button x-bind:class="italic ? 'bg-blue-500' : 'hover:bg-blue-200'"
-                    class="w-8 h-8 cursor-pointer italic flex justify-center items-center"
-                    x-on:click="toggleItalic">
+                    class="w-8 h-8 cursor-pointer italic flex justify-center items-center" x-on:click="toggleItalic">
                     I
                 </button>
                 <button x-bind:class="bold ? 'bg-blue-500' : 'hover:bg-blue-200'"
@@ -76,8 +75,7 @@
                     B
                 </button>
                 <button x-bind:class="list == 'ul' ? 'bg-blue-500' : 'hover:bg-blue-200'"
-                    class="w-8 h-8 cursor-pointer flex justify-center items-center"
-                    x-on:click="toggleList('ul')">
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleList('ul')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -85,8 +83,7 @@
                     </svg>
                 </button>
                 <button x-bind:class="list == 'ol' ? 'bg-blue-500' : 'hover:bg-blue-200'"
-                    class="w-8 h-8 cursor-pointer flex justify-center items-center"
-                    x-on:click="toggleList('ol')">
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleList('ol')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -154,9 +151,8 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-100 h-40" contenteditable>
-
-            </div>
+        </div>
+        <div class="bg-gray-100 h-40 overflow-y-scroll" contenteditable id="editor">
         </div>
         <script type="module" src="out/main.js"></script>
 </body>
