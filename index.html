@@ -8,73 +8,91 @@
 <body>
     <div id="root" class="p-10">
         <div x-data="{
-                decoration: 'none', 
-                italic: false, 
-                bold: false, 
-                list: 'none', 
+                currentNode: null,
                 sizesVisible: false, 
                 colorsVisible: false, 
                 sizes: [8, 10, 12, 14, 16, 18, 20, 24, 28], 
-                fontSize: 16, 
                 colors: ['red', 'green', 'blue', 'yellow', 'black', 'violet', 'orange', 'skyblue'], 
-                textColor: 'black', 
-                align: 'left', 
                 fontVisible: false, 
                 fonts: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Garamond', 'Helvetica', 'Impact', 'Lucida Console', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana'], 
-                fontFamily: 'Arial', 
                 toggleDecoration(decoration) {
-                    this.decoration = this.decoration === decoration ? 'none' : decoration
-                    setStyle('text-decoration', this.decoration)
+                    $store.style.decoration = $store.style.decoration === decoration ? 'none' : decoration
+                    setStyle('text-decoration', $store.style.decoration)
                 },
                 toggleList(list) {
-                    this.list = this.list === list ? 'none' : list
-                    setLineStyle('list-style-type', this.list)
+                    $store.style.list = $store.style.list === list ? 'none' : list
+                    setLineStyle('list-style-type', $store.style.list)
                 },
                 toggleAlign(align) {
-                    this.align = this.align === align ? 'left' : align
-                    setLineStyle('text-align', this.align)
+                    $store.style.align = $store.style.align === align ? 'left' : align
+                    setLineStyle('text-align', $store.style.align)
                 },
                 toggleFontFamily(font) {
-                    this.fontFamily = font
-                    setStyle('font-family', this.fontFamily)
+                    $store.style.fontFamily = font
+                    setStyle('font-family', $store.style.fontFamily)
                 },
                 toggleFontSize(size) {
-                    this.fontSize = size
-                    setStyle('font-size', this.fontSize + 'px')
+                    $store.style.fontSize = size
+                    setStyle('font-size', $store.style.fontSize + 'px')
                 },
                 toggleTextColor(color) {
-                    this.textColor = color
-                    setStyle('color', this.textColor)
+                    $store.style.textColor = color
+                    setStyle('color', $store.style.textColor)
                 },
                 toggleBold() {
-                    this.bold = !this.bold
-                    setStyle('font-weight', this.bold ? 'bold' : 'normal')
+                    $store.style.bold = !$store.style.bold
+                    setStyle('font-weight', $store.style.bold ? 'bold' : 'normal')
                 },
                 toggleItalic() {
-                    this.italic = !this.italic
-                    setStyle('font-style', this.italic ? 'italic' : 'normal')
+                    $store.style.italic = !$store.style.italic
+                    setStyle('font-style', $store.style.italic ? 'italic' : 'normal')
+                },
+                updateControl() {
+                    let current = getCurrentStyle(this.currentNode)
+                    if(current){
+                        this.currentNode = current[0]
+                        let currentStyle = current[1]
+                        $nextTick(() => {
+                            $store.style.decoration = currentStyle['text-decoration']
+                            $store.style.bold = currentStyle['font-weight'] == 'bold'
+                            $store.style.italic = currentStyle['font-style'] == 'italic'
+                            $store.style.list = currentStyle['list-style-type']
+                            $store.style.fontSize = parseInt(currentStyle['font-size'])
+                            $store.style.textColor = currentStyle['color']
+                            $store.style.align = currentStyle['text-align']
+                            $store.style.fontFamily = currentStyle['font-family']
+                        })
+                    }
+                },
+                addSelectionListener(){
+                    document.addEventListener('selectionchange', this.updateControl)
                 }
-            }">
+            }" x-init="addSelectionListener">
             <div class="flex flex-row gap-1 bg-gray-500">
-                <button x-bind:class="decoration == 'underline' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.decoration == 'underline' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer underline flex justify-center items-center"
                     x-on:click="toggleDecoration('underline')">
                     U
                 </button>
-                <button x-bind:class="decoration == 'line-through' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.decoration == 'line-through' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer line-through flex justify-center items-center"
                     x-on:click="toggleDecoration('line-through')">
                     abc
                 </button>
-                <button x-bind:class="italic ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.italic ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer italic flex justify-center items-center" x-on:click="toggleItalic">
                     I
                 </button>
-                <button x-bind:class="bold ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.bold ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer font-bold flex justify-center items-center" x-on:click="toggleBold">
                     B
                 </button>
-                <button x-bind:class="list == 'disc' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.list == 'disc' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleList('disc')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -82,7 +100,8 @@
                             d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                     </svg>
                 </button>
-                <button x-bind:class="list == 'decimal' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.list == 'decimal' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleList('decimal')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -91,28 +110,33 @@
                     </svg>
                 </button>
                 <div class="flex justify-center items-center relative">
-                    <button class="w-8 h-8 cursor-pointer flex justify-center items-center hover:bg-blue-200"
+                    <button x-on:mousedown="$event.preventDefault()"
+                        class="w-8 h-8 cursor-pointer flex justify-center items-center hover:bg-blue-200"
                         x-on:click="sizesVisible = !sizesVisible">A</button>
                     <div class="absolute top-8 left-0 w-20 bg-gray-400" x-show="sizesVisible">
                         <template x-for="size in sizes">
-                            <button x-text="size" class="cursor-pointer w-full h-8 hover:bg-blue-200"
+                            <button x-on:mousedown="$event.preventDefault()" x-text="size"
+                                class="cursor-pointer w-full h-8 hover:bg-blue-200"
                                 x-on:click="toggleFontSize(size); sizesVisible = false"></button>
                         </template>
                     </div>
                 </div>
                 <div class="flex justify-center items-center relative">
-                    <button class="w-8 h-8 cursor-pointer flex justify-center items-center"
+                    <button x-on:mousedown="$event.preventDefault()"
+                        class="w-8 h-8 cursor-pointer flex justify-center items-center"
                         x-on:click="colorsVisible = !colorsVisible">
-                        <span x-bind:style="{backgroundColor: textColor}" class="w-4 h-4"></span>
+                        <span x-bind:style="{backgroundColor: $store.style.textColor}" class="w-4 h-4"></span>
                     </button>
                     <div class="absolute top-8 left-0 w-20 bg-gray-400" x-show="colorsVisible">
                         <template x-for="color in colors">
-                            <button x-bind:style="{backgroundColor: color}" class="cursor-pointer w-full h-8"
+                            <button x-on:mousedown="$event.preventDefault()" x-bind:style="{backgroundColor: color}"
+                                class="cursor-pointer w-full h-8"
                                 x-on:click="toggleTextColor(color); colorsVisible = false"></button>
                         </template>
                     </div>
                 </div>
-                <button x-bind:class="align == 'left' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.align == 'left' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleAlign('left')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -120,7 +144,8 @@
                             d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
                     </svg>
                 </button>
-                <button x-bind:class="align == 'center' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.align == 'center' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleAlign('center')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -128,7 +153,8 @@
                             d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
                     </svg>
                 </button>
-                <button x-bind:class="align == 'right' ? 'bg-blue-500' : 'hover:bg-blue-200'"
+                <button x-on:mousedown="$event.preventDefault()"
+                    x-bind:class="$store.style.align == 'right' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleAlign('right')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -137,15 +163,15 @@
                     </svg>
                 </button>
                 <div class="flex justify-center items-center relative">
-                    <button x-bind:style="{fontFamily: fontFamily}"
+                    <button x-on:mousedown="$event.preventDefault()" x-bind:style="{fontFamily: $store.style.fontFamily}"
                         class="w-8 h-8 cursor-pointer flex justify-center items-center hover:bg-blue-200"
                         x-on:click="fontVisible = !fontVisible">
                         AA
                     </button>
                     <div class="absolute top-8 left-0 w-20 bg-gray-400" x-show="fontVisible">
                         <template x-for="font in fonts">
-                            <button x-bind:style="{fontFamily: font}" x-text="font"
-                                class="cursor-pointer w-full min-h-8 hover:bg-blue-200"
+                            <button x-on:mousedown="$event.preventDefault()" x-bind:style="{fontFamily: font}"
+                                x-text="font" class="cursor-pointer w-full min-h-8 hover:bg-blue-200"
                                 x-on:click="toggleFontFamily(font); fontVisible = false"></button>
                         </template>
                     </div>

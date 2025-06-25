@@ -7,6 +7,16 @@ declare global {
 }
 
 window.Alpine = Alpine
+Alpine.store('style', {
+    decoration: 'none',
+    italic: false,
+    bold: false,
+    list: 'none',
+    fontSize: 16,
+    textColor: 'black',
+    align: 'left',
+    fontFamily: 'Arial',
+})
 Alpine.start()
 
 
@@ -28,12 +38,22 @@ function splitNode(node: HTMLElement, start: number, end: number) {
         return node
     }
     if (start == 0) {
+        if (start == end) {
+            if (node.previousSibling && node.previousSibling.textContent?.length == 0) {
+                return node.previousSibling as HTMLElement
+            }
+        }
         let clone = node.cloneNode(true) as HTMLElement
         clone.textContent = text.substring(start, end)
         node.textContent = text.substring(end)
         node.parentElement?.insertBefore(clone, node)
         return clone
     } else if (end == text.length) {
+        if (start == end) {
+            if (node.nextSibling && node.nextSibling.textContent?.length == 0) {
+                return node.nextSibling as HTMLElement
+            }
+        }
         let clone = node.cloneNode(true) as HTMLElement
         clone.textContent = text.substring(start)
         node.textContent = text.substring(0, start)
@@ -55,28 +75,51 @@ export function setStyle(style: string, value: string) {
     currentStyle[style] = value
 
     let selection = window.getSelection()
-    if (selection == null || selection.rangeCount == 0) return
-    let range = selection.getRangeAt(0)
-    let start = range.startContainer.parentElement as HTMLElement
-    let end = range.endContainer.parentElement as HTMLElement
-    if (start.tagName != 'SPAN' || end.tagName != 'SPAN') return
+    if (selection == null) return
+    if (selection.rangeCount > 0) {
+        for (let i = 0; i < selection.rangeCount; i++) {
+            let range = selection.getRangeAt(i)
+            let start = range.startContainer.parentElement as HTMLElement
+            let end = range.endContainer.parentElement as HTMLElement
+            if (start.tagName != 'SPAN' || end.tagName != 'SPAN') continue
 
-    if (start == end) {
-        splitNode(start, range.startOffset, range.endOffset).style.setProperty(style, value)
-        return
-    }
-    start = splitNode(start, range.startOffset, start.textContent?.length ?? 0)
-    end = splitNode(end, 0, range.endOffset)
+            if (start == end) {
+                let node = splitNode(start, range.startOffset, range.endOffset)
+                node.style.setProperty(style, value)
+                if (node.textContent?.length) {
+                    range.setStart(node.childNodes[0], 0)
+                    range.setEnd(node.childNodes[0], (node.childNodes[0] as Text).length)
+                } else {
+                    range.setStart(node, 0)
+                    range.setEnd(node, 0)
+                }
+            } else {
+                start = splitNode(start, range.startOffset, start.textContent?.length ?? 0)
+                end = splitNode(end, 0, range.endOffset)
 
-    while (start != end && start) {
-        start.style.setProperty(style, value)
-        if (start.nextSibling) {
-            start = start.nextSibling as HTMLElement
-        }else{
-            start = start.parentElement?.nextSibling?.firstChild as HTMLElement
+                let current = start
+                while (current != end && current) {
+                    current.style.setProperty(style, value)
+                    if (current.nextSibling) {
+                        current = current.nextSibling as HTMLElement
+                    } else {
+                        current = current.parentElement?.nextSibling?.firstChild as HTMLElement
+                    }
+                }
+                end.style.setProperty(style, value)
+                if (start.textContent?.length) {
+                    range.setStart(start.childNodes[0], 0)
+                } else {
+                    range.setStart(start, 0)
+                }
+                if (end.textContent?.length) {
+                    range.setEnd(end.childNodes[0], (end.childNodes[0] as Text).length)
+                } else {
+                    range.setEnd(end, 0)
+                }
+            }
         }
     }
-    end.style.setProperty(style, value)
 }
 (window as any).setStyle = setStyle
 
@@ -85,21 +128,56 @@ export function setLineStyle(style: string, value: string) {
 
     let selection = window.getSelection()
     if (selection == null) return
-    let node = selection?.anchorNode?.parentElement as HTMLElement
-    if (node == null) return
+    if (selection.rangeCount > 0) {
+        for (let i = 0; i < selection.rangeCount; i++) {
+            let range = selection.getRangeAt(i)
+            let start = range.startContainer.parentElement as HTMLElement
+            let end = range.endContainer.parentElement as HTMLElement
+            if (start.tagName == 'SPAN') start = start.parentElement as HTMLElement
+            if (end.tagName == 'SPAN') end = end.parentElement as HTMLElement
 
-    if (node.tagName == 'SPAN') {
-        node = node.parentElement as HTMLElement
-    }
+            if (start.tagName != 'P' || end.tagName != 'P') continue
 
-    if (node.tagName == 'P') {
-        node.style.setProperty(style, value)
-        if(style == 'list-style-type'){
-            node.setAttribute('data-list', value)
+            let current = start
+            while (current) {
+                current.style.setProperty(style, value)
+                if (style == 'list-style-type') {
+                    current.setAttribute('data-list', value)
+                }
+                if (current == end) break
+                current = current.nextSibling as HTMLElement
+            }
         }
     }
 }
 (window as any).setLineStyle = setLineStyle
+
+export function getCurrentStyle(currentNode: HTMLElement) {
+    let selection = window.getSelection()
+    if (selection == null) return null
+    let node = selection.anchorNode as HTMLElement
+    if (node == null) return null
+    if (node instanceof Text) node = node.parentElement as HTMLElement
+    if (node == currentNode) return null
+    if (editor == null || !editor.contains(node)) return null
+
+    if (node.tagName == 'SPAN') {
+        let p = node.parentElement as HTMLElement
+        if (p.tagName == 'P') {
+            currentStyle['text-align'] = p.style.getPropertyValue('text-align')
+            currentStyle['list-style-type'] = p.style.getPropertyValue('list-style-type')
+            currentStyle['text-decoration'] = node.style.getPropertyValue('text-decoration')
+            currentStyle['font-weight'] = node.style.getPropertyValue('font-weight')
+            currentStyle['font-style'] = node.style.getPropertyValue('font-style')
+            currentStyle['color'] = node.style.getPropertyValue('color')
+            currentStyle['font-family'] = node.style.getPropertyValue('font-family')
+            currentStyle['font-size'] = node.style.getPropertyValue('font-size')
+            return [node, currentStyle]
+        }
+    }
+    return null
+}
+(window as any).getCurrentStyle = getCurrentStyle
 
 function createParagraph(editor: HTMLElement, text: string = "") {
     let p = document.createElement("p")
@@ -120,7 +198,6 @@ function createParagraph(editor: HTMLElement, text: string = "") {
 }
 
 function editorInit() {
-    let editor = document.getElementById("editor");
     if (editor == null) return
 
     editor.innerHTML = ''
@@ -130,9 +207,9 @@ function editorInit() {
         if (selection == null) return
         let node = selection.anchorNode
         if (node == null) return
+        const isPrintable = e.key.length === 1 && !e.ctrlKey && !e.metaKey;
 
         if (node == editor) {
-            const isPrintable = e.key.length === 1 && !e.ctrlKey && !e.metaKey;
             if (isPrintable) {
                 node = createParagraph(editor, e.key)
                 selection.setPosition(node.childNodes[0], 1)
@@ -143,8 +220,7 @@ function editorInit() {
             e.preventDefault()
             e.stopPropagation()
             return
-        } else if ((node as HTMLElement).tagName == 'p') {
-            const isPrintable = e.key.length === 1 && !e.ctrlKey && !e.metaKey;
+        } else if ((node as HTMLElement).tagName == 'P') {
             if (isPrintable) {
                 if (selection.anchorOffset == 0) {
                     node = node.childNodes[0]
@@ -155,10 +231,36 @@ function editorInit() {
                 }
                 e.preventDefault()
                 e.stopPropagation()
+                return
             }
-            return
+        } else if ((node as HTMLElement).tagName == 'SPAN') {
+            if (isPrintable) {
+                if (!node.textContent?.length) {
+                    node.textContent = e.key
+                    window.getSelection()?.setPosition(node, 1)
+                    e.preventDefault()
+                    e.stopPropagation()
+                    return
+                }
+            }
         }
+        // else if (node instanceof Text) {
+        //     if (node.parentElement?.tagName == 'SPAN') {
+        //         if (isPrintable) {
+        //             let sibling = node.parentElement.nextSibling
+        //             if (sibling && sibling.textContent?.length == 0) {
+        //                 sibling.textContent = e.key
+        //                 window.getSelection()?.setPosition(sibling, 1)
+        //                 e.preventDefault()
+        //                 e.stopPropagation()
+        //                 return
+        //             }
+        //         }
+        //     }
+        // }
     })
 }
+
+const editor = document.getElementById("editor")
 
 editorInit()
