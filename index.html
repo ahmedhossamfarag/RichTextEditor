@@ -180,6 +180,10 @@
         </div>
         <div class="bg-gray-100 h-40 overflow-y-scroll" contenteditable id="editor">
         </div>
+        <div class="w-full space-y-4 mt-4" x-data="{content: '', updateContent(){this.content = JSON.stringify(getEditorContent(), null, 2)}}">
+            <button x-on:click="updateContent" class="w-full bg-green-300 rounded-2xl p-2 text-center">Get Content</button>
+            <pre x-text="content" class="p-2 w-full  bg-blue-400"></pre>
+        </div>
         <script type="module" src="out/main.js"></script>
 </body>
 

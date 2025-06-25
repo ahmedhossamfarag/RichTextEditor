@@ -179,6 +179,53 @@ export function getCurrentStyle(currentNode: HTMLElement) {
 }
 (window as any).getCurrentStyle = getCurrentStyle
 
+export function getEditorContent() {
+    if (editor == null) return
+    let content = []
+    let paragraphs = editor.childNodes
+    for (let i = 0; i < paragraphs.length; i++) {
+        let p = paragraphs[i] as HTMLElement
+        if (p.tagName == 'P') {
+            let pContent = {
+                style: {
+                    'text-align': p.style.getPropertyValue('text-align'),
+                    'list-style-type': p.style.getPropertyValue('list-style-type')
+                },
+                content: [] as any
+            }
+            let spans = p.childNodes
+            let lastSpan: any = null
+            for (let i = 0; i < spans.length; i++) {
+                let s = spans[i] as HTMLElement
+                if (s.tagName == 'SPAN') {
+                    if (s.textContent) {
+                        let currentSpan: any = {
+                            text: s.textContent,
+                            style: {
+                                'text-decoration': s.style.getPropertyValue('text-decoration'),
+                                'font-weight': s.style.getPropertyValue('font-weight'),
+                                'font-style': s.style.getPropertyValue('font-style'),
+                                'color': s.style.getPropertyValue('color'),
+                                'font-family': s.style.getPropertyValue('font-family'),
+                                'font-size': s.style.getPropertyValue('font-size'),
+                            }
+                        }
+                        if (lastSpan && Object.keys(lastSpan.style).every(key => lastSpan.style[key] == currentSpan.style[key])) {
+                            lastSpan.text += currentSpan.text
+                        } else {
+                            pContent.content.push(currentSpan)
+                            lastSpan = currentSpan
+                        }
+                    }
+                }
+            }
+            content.push(pContent)
+        }
+    }
+    return content
+}
+(window as any).getEditorContent = getEditorContent
+
 function createParagraph(editor: HTMLElement, text: string = "") {
     let p = document.createElement("p")
     p.style.setProperty("text-align", currentStyle['text-align'])
