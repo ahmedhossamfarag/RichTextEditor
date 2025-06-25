@@ -7,31 +7,77 @@
 
 <body>
     <div id="root" class="p-10">
-        <div
-            x-data="{decoration: 'none', italic: false, bold: false, list: 'none', sizesVisible: false, colorsVisible: false, sizes: [8, 10, 12, 14, 16, 18, 20, 24, 28], fontSize: 16, colors: ['red', 'green', 'blue', 'yellow', 'black', 'violet', 'orange', 'skyblue'], textColor: 'black', align: 'left', fontVisible: false, fonts: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Garamond', 'Helvetica', 'Impact', 'Lucida Console', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana'], fontFamily: 'Arial', }">
+        <div x-data="{
+                decoration: 'none', 
+                italic: false, 
+                bold: false, 
+                list: 'none', 
+                sizesVisible: false, 
+                colorsVisible: false, 
+                sizes: [8, 10, 12, 14, 16, 18, 20, 24, 28], 
+                fontSize: 16, 
+                colors: ['red', 'green', 'blue', 'yellow', 'black', 'violet', 'orange', 'skyblue'], 
+                textColor: 'black', 
+                align: 'left', 
+                fontVisible: false, 
+                fonts: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Garamond', 'Helvetica', 'Impact', 'Lucida Console', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana'], 
+                fontFamily: 'Arial', 
+                toggleDecoration(decoration) {
+                    this.decoration = this.decoration === decoration ? 'none' : decoration
+                    setStyle('text-decoration', this.decoration)
+                },
+                toggleList(list) {
+                    this.list = this.list === list ? 'none' : list
+                    setLineStyle('list-style-type', this.list)
+                },
+                toggleAlign(align) {
+                    this.align = this.align === align ? 'left' : align
+                    setLineStyle('text-align', this.align)
+                },
+                toggleFontFamily(font) {
+                    this.fontFamily = font
+                    setStyle('font-family', this.fontFamily)
+                },
+                toggleFontSize(size) {
+                    this.fontSize = size
+                    setStyle('font-size', this.fontSize + 'px')
+                },
+                toggleTextColor(color) {
+                    this.textColor = color
+                    setStyle('color', this.textColor)
+                },
+                toggleBold() {
+                    this.bold = !this.bold
+                    setStyle('font-weight', this.bold ? 'bold' : 'normal')
+                },
+                toggleItalic() {
+                    this.italic = !this.italic
+                    setStyle('font-style', this.italic ? 'italic' : 'normal')
+                }
+            }">
             <div class="flex flex-row gap-1 bg-gray-500">
                 <button x-bind:class="decoration == 'underline' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer underline flex justify-center items-center"
-                    x-on:click="decoration = decoration == 'underline' ? 'none' : 'underline'">
+                    x-on:click="toggleDecoration('underline')">
                     U
                 </button>
                 <button x-bind:class="decoration == 'line-through' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer line-through flex justify-center items-center"
-                    x-on:click="decoration = decoration == 'line-through' ? 'none' : 'line-through'">
+                    x-on:click="toggleDecoration('line-through')">
                     abc
                 </button>
                 <button x-bind:class="italic ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer italic flex justify-center items-center"
-                    x-on:click="italic = !italic">
+                    x-on:click="toggleItalic">
                     I
                 </button>
                 <button x-bind:class="bold ? 'bg-blue-500' : 'hover:bg-blue-200'"
-                    class="w-8 h-8 cursor-pointer font-bold flex justify-center items-center" x-on:click="bold = !bold">
+                    class="w-8 h-8 cursor-pointer font-bold flex justify-center items-center" x-on:click="toggleBold">
                     B
                 </button>
                 <button x-bind:class="list == 'ul' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer flex justify-center items-center"
-                    x-on:click="list = list === 'ul' ? 'none' : 'ul'">
+                    x-on:click="toggleList('ul')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -40,7 +86,7 @@
                 </button>
                 <button x-bind:class="list == 'ol' ? 'bg-blue-500' : 'hover:bg-blue-200'"
                     class="w-8 h-8 cursor-pointer flex justify-center items-center"
-                    x-on:click="list = list === 'ol' ? 'none' : 'ol'">
+                    x-on:click="toggleList('ol')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -53,7 +99,7 @@
                     <div class="absolute top-8 left-0 w-20 bg-gray-400" x-show="sizesVisible">
                         <template x-for="size in sizes">
                             <button x-text="size" class="cursor-pointer w-full h-8 hover:bg-blue-200"
-                                x-on:click="fontSize = size; sizesVisible = false"></button>
+                                x-on:click="toggleFontSize(size); sizesVisible = false"></button>
                         </template>
                     </div>
                 </div>
@@ -65,12 +111,12 @@
                     <div class="absolute top-8 left-0 w-20 bg-gray-400" x-show="colorsVisible">
                         <template x-for="color in colors">
                             <button x-bind:style="{backgroundColor: color}" class="cursor-pointer w-full h-8"
-                                x-on:click="textColor = color; colorsVisible = false"></button>
+                                x-on:click="toggleTextColor(color); colorsVisible = false"></button>
                         </template>
                     </div>
                 </div>
                 <button x-bind:class="align == 'left' ? 'bg-blue-500' : 'hover:bg-blue-200'"
-                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="align = 'left'">
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleAlign('left')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -78,7 +124,7 @@
                     </svg>
                 </button>
                 <button x-bind:class="align == 'center' ? 'bg-blue-500' : 'hover:bg-blue-200'"
-                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="align = 'center'">
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleAlign('center')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -86,7 +132,7 @@
                     </svg>
                 </button>
                 <button x-bind:class="align == 'right' ? 'bg-blue-500' : 'hover:bg-blue-200'"
-                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="align = 'right'">
+                    class="w-8 h-8 cursor-pointer flex justify-center items-center" x-on:click="toggleAlign('right')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -103,7 +149,7 @@
                         <template x-for="font in fonts">
                             <button x-bind:style="{fontFamily: font}" x-text="font"
                                 class="cursor-pointer w-full min-h-8 hover:bg-blue-200"
-                                x-on:click="fontFamily = font; fontVisible = false"></button>
+                                x-on:click="toggleFontFamily(font); fontVisible = false"></button>
                         </template>
                     </div>
                 </div>

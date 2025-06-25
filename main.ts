@@ -8,3 +8,12 @@ declare global {
 
 window.Alpine = Alpine
 Alpine.start()
+
+
+function setStyle(style: string, value: string) {
+    
+}
+
+function setLineStyle(style: string, value: string) {
+
+}
